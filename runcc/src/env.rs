@@ -76,7 +76,7 @@ fn try_hex_to_u8(hex: char) -> Option<u8> {
     })
 }
 
-fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
+pub(crate) fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
     let mut state_data = State::None(0);
     let state = &mut state_data;
 
@@ -95,7 +95,7 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                     let key = &program[*start..end];
                     *state = State::KeyAndEqual(key, end);
                 } else if c.is_whitespace() {
-                    break;
+                    return (None, program.trim());
                 } else {
                     *end += c.len_utf8();
                 }
@@ -109,7 +109,9 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                         current: String::with_capacity(program.len() - start),
                         state: QuotedState::Normal,
                     },
-                    c if c.is_whitespace() => break,
+                    c if c.is_whitespace() => {
+                        return (None, program.trim());
+                    }
                     _ => ValueState::Raw,
                 };
 
@@ -129,7 +131,9 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                 match value_state {
                     ValueState::Raw => {
                         match c {
-                            '=' | '"' | '\'' => break,
+                            '=' | '"' | '\'' => {
+                                return (None, program.trim());
+                            }
                             _ => {
                                 if c.is_whitespace() {
                                     let end = *value_end;
@@ -197,7 +201,9 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                                             Unicode => {
                                                 *escaping_state = EscapingState::UnicodeStart;
                                             }
-                                            Invalid => break,
+                                            Invalid => {
+                                                return (None, program.trim());
+                                            }
                                         }
                                     }
                                     EscapingState::AsciiCharCodeStart => {
@@ -206,10 +212,10 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                                             if n <= 7 {
                                                 *escaping_state = EscapingState::AsciiCharCode(n);
                                             } else {
-                                                break;
+                                                return (None, program.trim());
                                             }
                                         } else {
-                                            break;
+                                            return (None, program.trim());
                                         }
                                     }
                                     EscapingState::AsciiCharCode(n) => {
@@ -217,23 +223,23 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                                         if let Some(n2) = n2 {
                                             let code = *n * 16 + n2;
                                             if code > 127 {
-                                                break;
+                                                return (None, program.trim());
                                             }
                                             if let Some(c) = char::from_u32(code.into()) {
                                                 current.push(c);
                                                 *quoted_state = QuotedState::Normal;
                                             } else {
-                                                break;
+                                                return (None, program.trim());
                                             }
                                         } else {
-                                            break;
+                                            return (None, program.trim());
                                         }
                                     }
                                     EscapingState::UnicodeStart => {
                                         if c == '{' {
                                             *escaping_state = EscapingState::UnicodeStartBrace;
                                         } else {
-                                            break;
+                                            return (None, program.trim());
                                         }
                                     }
                                     EscapingState::UnicodeStartBrace => {
@@ -241,7 +247,7 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                                         if let Some(n) = n {
                                             *escaping_state = EscapingState::Unicode(n.into());
                                         } else {
-                                            break;
+                                            return (None, program.trim());
                                         }
                                     }
                                     EscapingState::Unicode(n) => {
@@ -260,10 +266,10 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                                                 if let Some(code) = code {
                                                     *n = code
                                                 } else {
-                                                    break;
+                                                    return (None, program.trim());
                                                 }
                                             } else {
-                                                break;
+                                                return (None, program.trim());
                                             }
                                         }
                                     }
@@ -281,7 +287,7 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
                             };
                         } else {
                             // invalid: KEY="VALUE"echo 1
-                            break;
+                            return (None, program.trim());
                         }
                     }
                 };
@@ -298,6 +304,17 @@ fn match_one_env(program: &str) -> (Option<(&str, Cow<str>)>, &str) {
             value,
             program_start,
         } => (Some((key, value)), &program[program_start..].trim()),
+        State::KeyAndValue {
+            key,
+            value_state: ValueState::QuoteEnd(value),
+            ..
+        } => (Some((key, value.into())), ""),
+        State::KeyAndValue {
+            key,
+            value_start,
+            value_end,
+            value_state: ValueState::Raw,
+        } => (Some((key, (&program[value_start..value_end]).into())), ""),
         _ => (None, program.trim()),
     }
 }
@@ -401,6 +418,22 @@ mod tests {
                 " \u{1F600}\u{10ffff}",
                 "cargo run",
             ),
+        ] {
+            assert_eq!(
+                match_one_env(program),
+                (Some((k, v.into())), result_program)
+            );
+        }
+    }
+
+    #[test]
+    fn match_one_env_only() {
+        for (program, k, v, result_program) in [
+            ("K=V K2=V2", "K", "V", "K2=V2"),
+            ("K=V", "K", "V", ""),
+            ("K=V   ", "K", "V", ""),
+            (r"K='\x26'", "K", "&", ""),
+            (r#"K='\u{1F600}'"#, "K", "\u{1F600}", ""),
         ] {
             assert_eq!(
                 match_one_env(program),
