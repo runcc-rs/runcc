@@ -86,8 +86,21 @@ impl error::Error for ConfigDeserializeErrorKind {
 }
 
 #[non_exhaustive]
+#[derive(Debug)]
 pub struct ConfigDeserializeError {
     pub filename: String,
     pub format: ConfigFormat,
     pub kind: ConfigDeserializeErrorKind,
+}
+
+impl error::Error for ConfigDeserializeError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        self.kind.source()
+    }
+}
+
+impl Display for ConfigDeserializeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Invalid config file {}: {}", self.filename, self.kind)
+    }
 }
