@@ -21,8 +21,6 @@ pub fn run() -> io::Result<()> {
             )
         })?;
 
-    println!("{:?}", config);
-
     crate::run(config)
     // more program logic goes here...
 }
