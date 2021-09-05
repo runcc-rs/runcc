@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::cmp;
+use std::collections::HashMap;
 
 use super::super::{run::*, CommandConfig};
 use super::CommandConfigsInput;
@@ -9,6 +10,7 @@ use super::CommandConfigsInput;
 pub struct RunConfigInput {
     pub commands: CommandConfigsInput,
     pub max_label_length: Option<usize>,
+    pub envs: Option<HashMap<String, String>>,
 }
 
 impl Into<RunConfig> for RunConfigInput {
@@ -16,6 +18,7 @@ impl Into<RunConfig> for RunConfigInput {
         let Self {
             commands,
             max_label_length,
+            envs,
         } = self;
 
         let commands: Vec<CommandConfig> = commands.into();
@@ -34,6 +37,7 @@ impl Into<RunConfig> for RunConfigInput {
         RunConfig {
             commands,
             max_label_length,
+            envs,
         }
     }
 }

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use super::CommandConfig;
 
@@ -7,4 +8,5 @@ use super::CommandConfig;
 pub struct RunConfig {
     pub commands: Vec<CommandConfig>,
     pub max_label_length: usize,
+    pub envs: Option<HashMap<String, String>>,
 }
