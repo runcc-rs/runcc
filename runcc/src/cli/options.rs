@@ -63,6 +63,7 @@ impl Opts {
                     } else {
                         None
                     },
+                    windows_call_cmd_with_env: Default::default(),
                 }
                 .into(),
             ))

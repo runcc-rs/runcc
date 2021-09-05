@@ -13,8 +13,14 @@ pub struct CommandConfig {
     pub cwd: Option<String>,
 }
 
+#[non_exhaustive]
+#[derive(Debug, Default)]
+pub struct CommandConfigFromScriptOptions {
+    pub windows_call_cmd_with_env: super::WindowsCallCmdWithEnv,
+}
+
 impl CommandConfig {
-    pub fn from_script(script: &str) -> CommandConfig {
+    pub fn from_script(script: &str, options: &CommandConfigFromScriptOptions) -> CommandConfig {
         let script = script.trim();
 
         let (program, envs) = match_program_with_envs(script);
@@ -31,13 +37,30 @@ impl CommandConfig {
         };
         if program.contains(" ") {
             if cfg!(target_os = "windows") {
-                CommandConfig {
+                let with_env = &options.windows_call_cmd_with_env;
+
+                let env_name = with_env.clone().try_into_env_name();
+
+                let (arg, env) = match env_name {
+                    Some(env_name) => {
+                        (format!("%{}%", env_name), Some((env_name, program.clone())))
+                    }
+                    None => (program.clone(), None),
+                };
+
+                let mut cmd = CommandConfig {
                     program: "cmd".to_string(),
-                    args: Some(vec!["/C".to_string(), program.clone()]),
-                    label: Some(program),
+                    args: Some(vec!["/C".to_string(), arg]),
+                    label: Some(program.clone()),
                     envs,
                     cwd: None,
+                };
+
+                if let Some(env) = env {
+                    cmd.env(env);
                 }
+
+                cmd
             } else {
                 CommandConfig {
                     program: "sh".to_string(),
@@ -120,5 +143,10 @@ impl CommandConfig {
             }
             Some(label) => label.len(),
         }
+    }
+
+    pub fn env(&mut self, env: (String, String)) -> &mut Self {
+        self.envs.get_or_insert_with(|| vec![]).push(env);
+        self
     }
 }

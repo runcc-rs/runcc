@@ -12,10 +12,10 @@ pub enum CommandConfigInput {
     CommandConfig(CommandConfig),
 }
 
-impl Into<CommandConfig> for CommandConfigInput {
-    fn into(self) -> CommandConfig {
+impl CommandConfigInput {
+    pub fn into_config(self, options: &CommandConfigFromScriptOptions) -> CommandConfig {
         match self {
-            CommandConfigInput::Command(script) => CommandConfig::from_script(&script),
+            CommandConfigInput::Command(script) => CommandConfig::from_script(&script, options),
             CommandConfigInput::ProgramAndArgs(mut names) => {
                 let program = if names.is_empty() {
                     String::new()
@@ -40,17 +40,18 @@ pub enum CommandConfigsInput {
     LabeledCommands(HashMap<String, Option<CommandConfigInput>>),
 }
 
-impl Into<Vec<CommandConfig>> for CommandConfigsInput {
-    fn into(self) -> Vec<CommandConfig> {
+impl CommandConfigsInput {
+    pub fn into_configs(self, options: &CommandConfigFromScriptOptions) -> Vec<CommandConfig> {
         match self {
-            CommandConfigsInput::Commands(commands) => {
-                commands.into_iter().map(Into::into).collect()
-            }
+            CommandConfigsInput::Commands(commands) => commands
+                .into_iter()
+                .map(|cmd| cmd.into_config(options))
+                .collect(),
             CommandConfigsInput::LabeledCommands(map) => map
                 .into_iter()
                 .map(|(label, command)| match command {
                     Some(command) => {
-                        let mut command: CommandConfig = command.into();
+                        let mut command: CommandConfig = command.into_config(options);
                         command.label = Some(label);
 
                         command

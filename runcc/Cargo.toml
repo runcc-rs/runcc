@@ -2,4 +2,28 @@
 name = "runcc"
 version = "0.1.0"
 edition = "2018"
+authors = [
+    "Equal Ma <equalma@outlook.com>",
+]
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = "1"
+serde_json = "1"
+serde_yaml = "0.8"
+toml = "0.5"
+ron = "*"
+ctrlc = "3"
+clap = { version = "3.0.0-beta.4", optional = true }
+
+[target.'cfg(windows)'.dependencies]
+rand = "0.8"
+
+[features]
+default = ["cli"]
+cli = ["clap"]
+
+[[bin]]
+name = "cargo-runcc"
+required-features = ["cli"]
