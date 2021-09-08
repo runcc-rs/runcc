@@ -39,6 +39,7 @@ where
     commands: Arc<Vec<Arc<Mutex<CommandState<T>>>>>,
     killer: CommandSystemKiller<T>,
     handles: Vec<JoinHandle<()>>,
+    killer_handle: JoinHandle<()>,
     plugin: Arc<P>,
 }
 
@@ -116,12 +117,20 @@ where
             .into_iter()
             .unzip();
 
+        let command_count = commands.len();
         let commands_ret = Arc::new(commands);
 
         let commands = commands_ret.clone();
-        let join_killer = tokio::spawn(async move {
+        let killer_handle = tokio::spawn(async move {
+            let mut exited_command_count = 0;
             while let Some(exited_cmd) = rx.recv().await {
                 let reason = if let Some(ref exited_cmd) = exited_cmd {
+                    exited_command_count += 1;
+
+                    if exited_command_count >= command_count {
+                        break;
+                    }
+
                     let should_kill_all: bool = match &kill_behavior {
                         KillBehavior::None => false,
                         KillBehavior::WhenAnyExited => true,
@@ -175,13 +184,11 @@ where
             }
         });
 
-        let mut handles = handles;
-        handles.push(join_killer);
-
         Ok(Self {
             commands: commands_ret,
             killer: CommandSystemKiller(tx),
             handles,
+            killer_handle,
             plugin,
         })
     }
@@ -198,17 +205,53 @@ impl<T, P: CommandSystemPlugin<T>> CommandSystem<T, P> {
         self.killer.kill_all().await;
     }
 
-    pub async fn wait_into_stopped_commands(&mut self) -> Vec<Arc<CommandStopped<T, T>>> {
+    pub async fn wait(&mut self) {
         let Self {
             commands,
             handles,
             plugin,
+            killer_handle,
             ..
         } = self;
 
         for handle in handles {
             handle.await.expect("CommandSystem subtask panicked");
         }
+
+        killer_handle
+            .await
+            .expect("CommandSystem's subtask for killing commands panicked");
+
+        for cmd in commands.iter() {
+            let cmd = cmd.lock().unwrap();
+
+            match &*cmd {
+                CommandState::Stopped(_) => {}
+                _ => panic!("CommandState should be stopped after handles joined"),
+            }
+        }
+
+        if let Some(plugin_join) = plugin.join() {
+            let _ = plugin_join.await;
+        }
+    }
+
+    pub async fn wait_into_stopped_commands(&mut self) -> Vec<Arc<CommandStopped<T, T>>> {
+        let Self {
+            commands,
+            handles,
+            plugin,
+            killer_handle,
+            ..
+        } = self;
+
+        for handle in handles {
+            handle.await.expect("CommandSystem's subtask panicked");
+        }
+
+        killer_handle
+            .await
+            .expect("CommandSystem's subtask for killing commands panicked");
 
         let commands = commands
             .iter()
