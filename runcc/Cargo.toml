@@ -1,9 +1,22 @@
 [package]
 name = "runcc"
 version = "0.1.0"
+description = "run commands concurrently with rust and cargo"
+license = "MIT"
 edition = "2018"
 authors = [
     "Equal Ma <equalma@outlook.com>",
+]
+homepage = "https://github.com/runcc-rs/runcc"
+repository = "https://github.com/runcc-rs/runcc"
+categories = [
+    "command-line-utilities",
+    "development-tools::cargo-plugins",
+    "concurrency",
+]
+keywords = [
+    "concurrent",
+    "parallel",
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
