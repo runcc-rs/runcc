@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::cmp;
 use std::collections::HashMap;
 
-use super::super::{run::*, CommandConfig, CommandConfigFromScriptOptions};
+use super::super::{run::*, CommandConfig, CommandConfigFromScriptOptions, KillBehavior};
 use super::CommandConfigsInput;
 
 #[non_exhaustive]
@@ -13,6 +13,8 @@ pub struct RunConfigInput {
     pub envs: Option<HashMap<String, String>>,
     #[serde(default)]
     pub windows_call_cmd_with_env: super::WindowsCallCmdWithEnv,
+    #[serde(default)]
+    pub kill: KillBehavior,
 }
 
 impl Into<RunConfig> for RunConfigInput {
@@ -22,6 +24,7 @@ impl Into<RunConfig> for RunConfigInput {
             max_label_length,
             envs,
             windows_call_cmd_with_env,
+            kill,
         } = self;
 
         let commands: Vec<CommandConfig> = commands.into_configs(&CommandConfigFromScriptOptions {
@@ -43,6 +46,7 @@ impl Into<RunConfig> for RunConfigInput {
             commands,
             max_label_length,
             envs,
+            kill,
         }
     }
 }
