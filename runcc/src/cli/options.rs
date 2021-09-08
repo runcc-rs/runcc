@@ -5,10 +5,9 @@ use clap::{crate_authors, crate_version, AppSettings, Clap};
 use super::OptionsError;
 use crate::{read, KillBehavior, RunConfig};
 
-/// This doc string acts as a help message when the user runs '--help'
-/// as do all doc strings on fields
+/// Run commands concurrently
 #[derive(Clap)]
-#[clap(version = crate_version!(), author = crate_authors!("\n"))]
+#[clap(version = crate_version!(), author = crate_authors!(", "), bin_name = "cargo runcc")]
 #[clap(setting = AppSettings::ColoredHelp)]
 pub struct Opts {
     command: Vec<String>,
