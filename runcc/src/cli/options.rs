@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use clap::{crate_authors, crate_version, AppSettings, Clap};
 
 use super::OptionsError;
-use crate::{read, RunConfig};
+use crate::{read, KillBehavior, RunConfig};
 
 /// This doc string acts as a help message when the user runs '--help'
 /// as do all doc strings on fields
@@ -16,6 +16,8 @@ pub struct Opts {
     max_label_length: Option<usize>,
     #[clap(short, long)]
     env: Vec<String>,
+    #[clap(short, long)]
+    kill: Option<KillBehavior>,
 }
 
 impl Opts {
@@ -26,7 +28,32 @@ impl Opts {
             command,
             max_label_length,
             env,
+            kill,
         } = self;
+
+        let envs = if env.len() > 0 {
+            let envs: HashMap<String, String> = env
+                .into_iter()
+                .map(|env| {
+                    let (kv, program) = crate::env::match_one_env(&env);
+
+                    if let Some(kv) = kv {
+                        if program == "" {
+                            Ok((kv.0.to_string(), kv.1.to_string()))
+                        } else {
+                            Err(env)
+                        }
+                    } else {
+                        Err(env)
+                    }
+                })
+                .collect::<Result<_, _>>()
+                .or_else(|invalid_env| Err(OptionsError::EnvSyntaxError(invalid_env)))?;
+
+            Some(envs)
+        } else {
+            None
+        };
 
         if command.len() > 0 {
             Ok(Some(
@@ -38,31 +65,8 @@ impl Opts {
                             .collect(),
                     ),
                     max_label_length,
-                    envs: if env.len() > 0 {
-                        let envs: HashMap<String, String> = env
-                            .into_iter()
-                            .map(|env| {
-                                let (kv, program) = crate::env::match_one_env(&env);
-
-                                if let Some(kv) = kv {
-                                    if program == "" {
-                                        Ok((kv.0.to_string(), kv.1.to_string()))
-                                    } else {
-                                        Err(env)
-                                    }
-                                } else {
-                                    Err(env)
-                                }
-                            })
-                            .collect::<Result<_, _>>()
-                            .or_else(|invalid_env| {
-                                Err(OptionsError::EnvSyntaxError(invalid_env))
-                            })?;
-
-                        Some(envs)
-                    } else {
-                        None
-                    },
+                    kill: kill.unwrap_or_default(),
+                    envs,
                     windows_call_cmd_with_env: Default::default(),
                 }
                 .into(),
@@ -72,7 +76,36 @@ impl Opts {
                 read::find_config_file_in_cwd("runcc")
                     .or_else(|err| Err(OptionsError::ConfigFileError(err)))?;
 
-            Ok(data.and_then(|data| Some(data.data.into())))
+            if let Some(data) = data {
+                let mut config: RunConfig = data.data.into();
+
+                if let Some(envs) = envs {
+                    eprintln!("[runcc][warning] env vars from cli args will be appended to envs from config file");
+                    if let Some(old_envs) = &mut config.envs {
+                        old_envs.extend(envs);
+                    } else {
+                        config.envs = Some(envs);
+                    };
+                }
+
+                if let Some(max_label_length) = max_label_length {
+                    if max_label_length != config.max_label_length {
+                        eprintln!("[runcc][warning] max_label_length from cli args will override the value from config file");
+                        config.max_label_length = max_label_length;
+                    }
+                }
+
+                if let Some(kill) = kill {
+                    if kill != config.kill {
+                        eprintln!("[runcc][warning] kill from cli args will override the value from config file");
+                        config.kill = kill;
+                    }
+                }
+
+                Ok(Some(config))
+            } else {
+                Ok(None)
+            }
         }
     }
 }

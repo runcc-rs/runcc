@@ -1,9 +1,9 @@
 use clap::Clap;
 use std::io;
 
-use super::options::Opts;
+use super::{options::Opts, CommandSystemLogPlugin};
 
-pub fn run() -> io::Result<()> {
+pub async fn run() -> io::Result<()> {
     let opts: Opts = Opts::parse();
 
     let config = opts
@@ -21,6 +21,23 @@ pub fn run() -> io::Result<()> {
             )
         })?;
 
-    crate::run(config)
-    // more program logic goes here...
+    let mut system =
+        crate::run::spawn_from_run_config_with_plugin(config, CommandSystemLogPlugin::new())?;
+
+    let killer = system.share_killer();
+
+    let _ = tokio::spawn(async move {
+        if let Err(err) = tokio::signal::ctrl_c().await {
+            eprintln!(
+                "[runcc][warning] failed to setup Ctrl-C signal handler{}",
+                err
+            )
+        };
+
+        killer.kill_all().await;
+    });
+
+    system.wait_into_stopped_commands().await;
+
+    Ok(())
 }

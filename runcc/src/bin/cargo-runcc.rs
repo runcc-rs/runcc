@@ -1,5 +1,6 @@
 use runcc::cli::run;
 
-fn main() -> Result<(), std::io::Error> {
-    run()
+#[tokio::main]
+async fn main() -> Result<(), std::io::Error> {
+    run().await
 }
