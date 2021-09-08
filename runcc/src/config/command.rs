@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::process::Command;
 
 use crate::env::match_program_with_envs;
 
@@ -17,6 +16,53 @@ pub struct CommandConfig {
 #[derive(Debug, Default)]
 pub struct CommandConfigFromScriptOptions {
     pub windows_call_cmd_with_env: super::WindowsCallCmdWithEnv,
+}
+
+macro_rules! def_into_command_and_label {
+    ($name:ident -> $cmd_type:ty) => {
+        pub fn $name<I, K, V>(self, inherited_envs: Option<I>) -> ($cmd_type, String)
+        where
+            I: IntoIterator<Item = (K, V)>,
+            K: AsRef<std::ffi::OsStr>,
+            V: AsRef<std::ffi::OsStr>,
+        {
+            let Self {
+                program,
+                args,
+                label,
+                envs,
+                cwd,
+            } = self;
+
+            let mut command = <$cmd_type>::new(&program);
+
+            if let Some(cwd) = cwd {
+                command.current_dir(cwd);
+            }
+
+            if let Some(args) = &args {
+                command.args(args);
+            }
+
+            if let Some(envs) = inherited_envs {
+                command.envs(envs);
+            }
+
+            if let Some(envs) = envs {
+                command.envs(envs);
+            }
+
+            let label = label.unwrap_or_else(move || {
+                if let Some(args) = args {
+                    format!("{} {}", program, args.join(" "))
+                } else {
+                    program
+                }
+            });
+
+            (command, label)
+        }
+    };
 }
 
 impl CommandConfig {
@@ -91,47 +137,6 @@ impl CommandConfig {
         }
     }
 
-    pub fn into_command_and_label(
-        self,
-        inherited_envs: Option<Vec<(String, String)>>,
-    ) -> (Command, String) {
-        let Self {
-            program,
-            args,
-            label,
-            envs,
-            cwd,
-        } = self;
-
-        let mut command = Command::new(&program);
-
-        if let Some(cwd) = cwd {
-            command.current_dir(cwd);
-        }
-
-        if let Some(args) = &args {
-            command.args(args);
-        }
-
-        if let Some(envs) = inherited_envs {
-            command.envs(envs);
-        }
-
-        if let Some(envs) = envs {
-            command.envs(envs);
-        }
-
-        let label = label.unwrap_or_else(move || {
-            if let Some(args) = args {
-                format!("{} {}", program, args.join(" "))
-            } else {
-                program
-            }
-        });
-
-        (command, label)
-    }
-
     pub fn label_length(&self) -> usize {
         match &self.label {
             None => {
@@ -149,4 +154,8 @@ impl CommandConfig {
         self.envs.get_or_insert_with(|| vec![]).push(env);
         self
     }
+
+    def_into_command_and_label! {into_command_and_label->std::process::Command}
+
+    def_into_command_and_label! {into_tokio_command_and_label->tokio::process::Command}
 }
