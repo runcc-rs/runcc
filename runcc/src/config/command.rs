@@ -81,46 +81,35 @@ impl CommandConfig {
         } else {
             None
         };
-        if program.contains(" ") {
-            if cfg!(target_os = "windows") {
-                let with_env = &options.windows_call_cmd_with_env;
 
-                let env_name = with_env.clone().try_into_env_name();
+        if cfg!(target_os = "windows") {
+            let with_env = &options.windows_call_cmd_with_env;
 
-                let (arg, env) = match env_name {
-                    Some(env_name) => {
-                        (format!("%{}%", env_name), Some((env_name, program.clone())))
-                    }
-                    None => (program.clone(), None),
-                };
+            let env_name = with_env.clone().try_into_env_name();
 
-                let mut cmd = CommandConfig {
-                    program: "cmd".to_string(),
-                    args: Some(vec!["/C".to_string(), arg]),
-                    label: Some(program.clone()),
-                    envs,
-                    cwd: None,
-                };
+            let (arg, env) = match env_name {
+                Some(env_name) => (format!("%{}%", env_name), Some((env_name, program.clone()))),
+                None => (program.clone(), None),
+            };
 
-                if let Some(env) = env {
-                    cmd.env(env);
-                }
+            let mut cmd = CommandConfig {
+                program: "cmd".to_string(),
+                args: Some(vec!["/C".to_string(), arg]),
+                label: Some(program.clone()),
+                envs,
+                cwd: None,
+            };
 
-                cmd
-            } else {
-                CommandConfig {
-                    program: "sh".to_string(),
-                    args: Some(vec!["-c".to_string(), program.clone()]),
-                    label: Some(program),
-                    envs,
-                    cwd: None,
-                }
+            if let Some(env) = env {
+                cmd.env(env);
             }
+
+            cmd
         } else {
             CommandConfig {
-                program,
-                args: None,
-                label: None,
+                program: "sh".to_string(),
+                args: Some(vec!["-c".to_string(), program.clone()]),
+                label: Some(program),
                 envs,
                 cwd: None,
             }
