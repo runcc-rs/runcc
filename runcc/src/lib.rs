@@ -4,8 +4,7 @@ mod env;
 pub use config::*;
 pub use env::*;
 
-mod run;
-pub use run::run;
+pub mod run;
 
 pub mod label;
 
