@@ -4,7 +4,16 @@ use std::io;
 use super::{options::Opts, CommandSystemLogPlugin};
 
 pub async fn run() -> io::Result<()> {
-    let opts: Opts = Opts::parse();
+    let args = std::env::args_os();
+    let mut args: Vec<_> = args.collect();
+
+    if let Some(arg) = args.get(1) {
+        if arg == "runcc" {
+            args.remove(1);
+        }
+    }
+
+    let opts: Opts = Opts::parse_from(args);
 
     let config = opts
         .try_into_config()
