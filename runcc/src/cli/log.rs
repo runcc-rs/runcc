@@ -98,9 +98,9 @@ impl CommandSystemPlugin<LabeledCommandData> for CommandSystemLogPlugin {
             Some(kill_status) => {
                 use crate::run::kill::KillJoinHandleFinalStatus as KS;
                 match kill_status {
-                    KS::Killed(reason) => format!(" killed due to {}", reason).into(),
+                    KS::Killed(reason) => format!(" (killed due to {})", reason).into(),
                     KS::FailedToKill { reason, error } => {
-                        format!(" tried to kill due to {} but failed: {}", reason, error).into()
+                        format!(" (tried to kill due to {} but failed: {})", reason, error).into()
                     }
                     _ => "".into(),
                 }
