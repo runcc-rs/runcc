@@ -85,12 +85,6 @@ impl Default for WindowsCallCmdWithEnv {
     }
 }
 
-impl Display for WindowsCallCmdWithEnv {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
-}
-
 /// strictly validate env name [a-zA-Z][a-zA-Z0-9_]*
 #[cfg(test)]
 mod tests {
