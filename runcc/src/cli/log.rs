@@ -123,6 +123,13 @@ impl CommandSystemPlugin<LabeledCommandData> for CommandSystemLogPlugin {
             }
         }))
     }
+
+    fn initialize_spawn_failed_command_data(
+        &self,
+        data: Self::CommandInitialData,
+    ) -> LabeledCommandData {
+        data
+    }
 }
 
 impl Display for kill::KillCommandReason<LabeledCommandData> {

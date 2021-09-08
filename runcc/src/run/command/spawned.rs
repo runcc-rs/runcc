@@ -59,6 +59,23 @@ impl<T, R> CommandSpawned<T, R> {
 
         join_handle.join().await.with_data(data).1
     }
+
+    pub fn with_data<S>(self, new_data: S) -> (T, CommandSpawned<S, R>) {
+        let Self {
+            data,
+            join_handle,
+            killer,
+        } = self;
+
+        (
+            data,
+            CommandSpawned {
+                data: new_data,
+                join_handle,
+                killer,
+            },
+        )
+    }
 }
 
 impl<T: Clone, R> CommandSpawned<T, R> {

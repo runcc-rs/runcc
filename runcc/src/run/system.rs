@@ -1,5 +1,5 @@
 use std::{
-    cmp, io, mem,
+    cmp, mem,
     sync::{Arc, Mutex},
 };
 
@@ -48,7 +48,7 @@ where
     T: std::marker::Send + std::marker::Sync + 'static,
     P: CommandSystemPlugin<T>,
 {
-    fn spawn_with_plugin<I>(commands: I, kill_behavior: KillBehavior, plugin: P) -> io::Result<Self>
+    fn spawn_with_plugin<I>(commands: I, kill_behavior: KillBehavior, plugin: P) -> Self
     where
         I: IntoIterator<Item = (Command, P::CommandInitialData)>,
         P: ,
@@ -61,8 +61,30 @@ where
         let (commands, handles): (Vec<_>, Vec<_>) = commands
             .into_iter()
             .map(|(command, data)| {
+                let tx = tx.clone();
                 let plugin = plugin.clone();
-                let (cmd, stdout, stderr) = CommandInitialized::new(command, data).spawn::<T>()?;
+
+                let spawned = CommandInitialized::new(command, ()).spawn::<T>();
+
+                let (cmd, stdout, stderr) = match spawned {
+                    Ok((cmd, stdout, stderr)) => (cmd.with_data(data).1, stdout, stderr),
+                    Err(err) => {
+                        let data = plugin.initialize_spawn_failed_command_data(data);
+                        let cmd = Arc::new(CommandStopped {
+                            data,
+                            exit_status: Err(err),
+                            killed: None,
+                        });
+                        let mutex = Arc::new(Mutex::new(CommandState::Stopped(cmd.clone())));
+
+                        let handle = tokio::spawn(async move {
+                            &plugin.on_command_exited(cmd.clone());
+                            let _ = tx.send(Some(cmd)).await;
+                        });
+
+                        return (mutex, handle);
+                    }
+                };
 
                 let CommandSpawned {
                     data,
@@ -74,7 +96,6 @@ where
 
                 let mutex_ret = Arc::new(Mutex::new(CommandState::Spawned { data, killer }));
 
-                let tx = tx.clone();
                 let mutex = mutex_ret.clone();
 
                 let handle = tokio::spawn(async move {
@@ -111,9 +132,9 @@ where
                     }
                 });
 
-                Ok((mutex_ret, handle))
+                (mutex_ret, handle)
             })
-            .collect::<io::Result<Vec<_>>>()?
+            .collect::<Vec<_>>()
             .into_iter()
             .unzip();
 
@@ -184,13 +205,13 @@ where
             }
         });
 
-        Ok(Self {
+        Self {
             commands: commands_ret,
             killer: CommandSystemKiller(tx),
             handles,
             killer_handle,
             plugin,
-        })
+        }
     }
 }
 
@@ -281,7 +302,7 @@ pub struct LabeledCommandData {
 pub fn spawn_from_run_config_with_plugin<T, P>(
     run_config: RunConfig,
     plugin: P,
-) -> io::Result<CommandSystem<T, P>>
+) -> CommandSystem<T, P>
 where
     T: Send + Sync + 'static,
     P: CommandSystemPlugin<T, CommandInitialData = LabeledCommandData>,
@@ -309,6 +330,8 @@ where
 
 pub trait CommandSystemPlugin<T>: Send + Sync + 'static + Sized {
     type CommandInitialData;
+
+    fn initialize_spawn_failed_command_data(&self, data: Self::CommandInitialData) -> T;
 
     fn initialize_command_data(
         &self,

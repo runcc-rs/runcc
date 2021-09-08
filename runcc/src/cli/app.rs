@@ -22,7 +22,7 @@ pub async fn run() -> io::Result<()> {
         })?;
 
     let mut system =
-        crate::run::spawn_from_run_config_with_plugin(config, CommandSystemLogPlugin::new())?;
+        crate::run::spawn_from_run_config_with_plugin(config, CommandSystemLogPlugin::new());
 
     tokio::select!(
         res = tokio::signal::ctrl_c() => {
