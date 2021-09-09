@@ -11,8 +11,11 @@ use tokio::{
 
 use crate::{label::Label, KillBehavior, RunConfig};
 
-use super::command::{CommandInitialized, CommandSpawned, CommandStopped};
 use super::kill;
+use super::{
+    command::{CommandInitialized, CommandSpawned, CommandStopped},
+    CommandSystemSimpleReport,
+};
 
 enum CommandState<T> {
     Processing,
@@ -226,7 +229,7 @@ impl<T, P: CommandSystemPlugin<T>> CommandSystem<T, P> {
         self.killer.kill_all().await;
     }
 
-    pub async fn wait(&mut self) {
+    pub async fn wait(&mut self) -> CommandSystemSimpleReport {
         let Self {
             commands,
             handles,
@@ -243,17 +246,31 @@ impl<T, P: CommandSystemPlugin<T>> CommandSystem<T, P> {
             .await
             .expect("CommandSystem's subtask for killing commands panicked");
 
+        let command_count_total = commands.len();
+        let mut command_count_success = 0usize;
+
         for cmd in commands.iter() {
             let cmd = cmd.lock().unwrap();
 
             match &*cmd {
-                CommandState::Stopped(_) => {}
+                CommandState::Stopped(cmd) => {
+                    if let Ok(status) = cmd.exit_status {
+                        if status.success() {
+                            command_count_success += 1;
+                        }
+                    }
+                }
                 _ => panic!("CommandState should be stopped after handles joined"),
             }
         }
 
         if let Some(plugin_join) = plugin.join() {
             let _ = plugin_join.await;
+        }
+
+        CommandSystemSimpleReport {
+            command_count_total,
+            command_count_success,
         }
     }
 
