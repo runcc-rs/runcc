@@ -15,8 +15,8 @@ plugins:
     - replacements:
         - files:
             - runcc/Cargo.toml
-          from: 'version = ".*"'
-          to: 'version = "${nextRelease.version}"'
+          from: 'version = ".*" # replace version'
+          to: 'version = "${nextRelease.version}" # replace version'
           results:
             - file: runcc/Cargo.toml
               hasChanged: true
