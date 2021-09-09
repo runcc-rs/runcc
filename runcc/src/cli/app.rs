@@ -2,8 +2,9 @@ use clap::Clap;
 use std::io;
 
 use super::{options::Opts, CommandSystemLogPlugin};
+use crate::run::CommandSystemSimpleReport;
 
-pub async fn run() -> io::Result<()> {
+pub async fn run() -> io::Result<CommandSystemSimpleReport> {
     let args = std::env::args_os();
     let mut args: Vec<_> = args.collect();
 
@@ -25,7 +26,7 @@ pub async fn run() -> io::Result<()> {
     let mut system =
         crate::run::spawn_from_run_config_with_plugin(config, CommandSystemLogPlugin::new());
 
-    tokio::select!(
+    let report = tokio::select!(
         res = tokio::signal::ctrl_c() => {
             if let Err(err) = res {
                 eprintln!(
@@ -34,11 +35,11 @@ pub async fn run() -> io::Result<()> {
                 );
             } else {
                 system.kill_all().await;
-                system.wait().await;
             }
+            system.wait().await
         },
-        _ = system.wait() => {},
+        report = system.wait() => report,
     );
 
-    Ok(())
+    Ok(report)
 }

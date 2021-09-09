@@ -10,9 +10,17 @@ impl std::fmt::Debug for ExitMessage {
 
 #[tokio::main]
 async fn main() -> Result<(), ExitMessage> {
-    if let Err(err) = run().await {
-        Err(ExitMessage(format!("{}", err)))
-    } else {
-        Ok(())
-    }
+    let exit_code: i32 = match run().await {
+        Err(err) => return Err(ExitMessage(format!("{}", err))),
+        Ok(report) => {
+            let failed = report.command_count_failed();
+            if failed == 0 {
+                return Ok(());
+            } else {
+                2
+            }
+        }
+    };
+
+    std::process::exit(exit_code);
 }
