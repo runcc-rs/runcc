@@ -1,0 +1,20 @@
+commands:
+  kill: node -e "setTimeout(()=>{ process.exitCode = 123 },700)"
+  kill2: node -e "setTimeout(()=>{},300)"
+  increment:
+    - node
+    - -e
+    - |
+      let i = 1;
+      setInterval(()=>{
+        console.log(`time = ${i * 100}`);
+        i++;
+      }, 100)
+  ls-runcc:
+    program: node
+    args:
+      - -e
+      - setInterval(()=>{ console.log(require('fs').readFileSync('Cargo.toml', 'utf8').split("\n")[1]) }, 270)
+    cwd: "./runcc"
+# when any command exits with status code 123, kill all other running commands
+kill: 123
