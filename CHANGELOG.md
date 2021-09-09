@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/runcc-rs/runcc/compare/v1.0.0...v1.0.1) (2021-09-09)
+
+
+### Bug Fixes
+
+* specify runcc/ron version ([0141c1f](https://github.com/runcc-rs/runcc/commit/0141c1f9e64ba2893586696264db8da02648bee9))
+
 # 1.0.0 (2021-09-09)
 
 
