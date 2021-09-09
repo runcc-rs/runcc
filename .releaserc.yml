@@ -24,9 +24,11 @@ plugins:
               numReplacements: 1
           countMatches: true
   - - "@semantic-release/exec"
-    - publishCmd: cd runcc && cargo publish
+    - prepareCmd: cargo check
+      publishCmd: cd runcc && cargo publish
   - - "@semantic-release/git"
     - assets:
         - CHANGELOG.md
         - runcc/Cargo.toml
+        - Cargo.lock
   - "@semantic-release/github"
