@@ -1,11 +1,13 @@
 use std::fmt::Display;
 
-use crate::read::error::ConfigDeserializeError;
+use crate::read::error::FindConfigError;
 
 #[derive(Debug)]
 pub enum OptionsError {
-    ConfigFileError(ConfigDeserializeError),
+    ConfigFileError(FindConfigError),
     EnvSyntaxError(String),
+    DuplicateConfigs,
+    NoConfigs,
 }
 
 impl std::error::Error for OptionsError {
@@ -23,6 +25,18 @@ impl Display for OptionsError {
             OptionsError::ConfigFileError(err) => write!(f, "Config file error: {}", err),
             OptionsError::EnvSyntaxError(env) => {
                 write!(f, "The following env var has invalid syntax: {}", env)
+            }
+            OptionsError::DuplicateConfigs => {
+                write!(
+                    f,
+                    "Positional arguments and -c option can not be both specified"
+                )
+            }
+            OptionsError::NoConfigs => {
+                write!(
+                    f,
+                    "Please specify commands from config file or positional arguments"
+                )
             }
         }
     }

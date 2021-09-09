@@ -1,4 +1,4 @@
-use std::{error, fmt::Display};
+use std::{error, fmt::Display, io};
 
 use super::ConfigFormat;
 
@@ -102,5 +102,88 @@ impl error::Error for ConfigDeserializeError {
 impl Display for ConfigDeserializeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Invalid config file {}: {}", self.filename, self.kind)
+    }
+}
+
+#[derive(Debug)]
+pub enum ReadConfigError {
+    DeserializeError(ConfigDeserializeError),
+    OpenFileError { file: String, error: io::Error },
+}
+
+impl error::Error for ReadConfigError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        match self {
+            ReadConfigError::DeserializeError(err) => Some(err),
+            ReadConfigError::OpenFileError { error, .. } => Some(error),
+        }
+    }
+}
+
+impl Display for ReadConfigError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ReadConfigError::DeserializeError(err) => write!(f, "{}", err),
+            ReadConfigError::OpenFileError { error, file } => {
+                write!(f, "Failed to open file \"{}\": {}", file, error)
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum FindConfigError {
+    NoFileMatch {
+        patterns: Vec<String>,
+        dir: String,
+    },
+    ReadError(ReadConfigError),
+    UnknownExtension {
+        file: String,
+        extension: Option<String>,
+    },
+}
+
+impl error::Error for FindConfigError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        None
+    }
+}
+
+impl Display for FindConfigError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FindConfigError::NoFileMatch { patterns, dir } => write!(
+                f,
+                r#"No files in "{}" matched the patterns: {}"#,
+                dir,
+                patterns.join(", ")
+            ),
+            FindConfigError::ReadError(err) => write!(f, "{}", err),
+            FindConfigError::UnknownExtension { file, extension } => {
+                write!(
+                    f,
+                    "Unknown extension \"{}\" for file \"{}\"",
+                    if let Some(extension) = extension {
+                        extension
+                    } else {
+                        "none"
+                    },
+                    file
+                )
+            }
+        }
+    }
+}
+
+impl From<ConfigDeserializeError> for ReadConfigError {
+    fn from(err: ConfigDeserializeError) -> Self {
+        Self::DeserializeError(err)
+    }
+}
+
+impl From<ReadConfigError> for FindConfigError {
+    fn from(err: ReadConfigError) -> Self {
+        Self::ReadError(err)
     }
 }
