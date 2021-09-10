@@ -1,7 +1,7 @@
 # runcc
 
-![Crates.io](https://img.shields.io/crates/v/runcc?style=for-the-badge)
-![docs.rs](https://img.shields.io/docsrs/runcc/latest?style=for-the-badge)
+[![Crates.io](https://img.shields.io/crates/v/runcc?style=for-the-badge)](https://crates.io/crates/runcc)
+[![docs.rs](https://img.shields.io/docsrs/runcc/latest?style=for-the-badge)](https://docs.rs/runcc)
 [![GitHub license](https://img.shields.io/github/license/runcc-rs/runcc?style=for-the-badge)](https://github.com/runcc-rs/runcc/blob/main/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/runcc-rs/runcc?style=for-the-badge)](https://github.com/runcc-rs/runcc/stargazers)
 
