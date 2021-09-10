@@ -1,0 +1,4 @@
+commands:
+  success1: node -e "setTimeout(()=>{},700)"
+  success2: node -e "setTimeout(()=>{},300)"
+  success3: node -e "''"

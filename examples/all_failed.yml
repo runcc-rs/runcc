@@ -1,0 +1,4 @@
+commands:
+  failed1: exit 1
+  failed2: exit 2
+  failed3: exit 123
