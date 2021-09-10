@@ -29,13 +29,16 @@ toml = "0.5"
 ron = "0.6"
 tokio = { version = "1", features = ["process", "macros", "rt", "sync", "signal", "io-util", "rt-multi-thread"] }
 clap = { version = "3.0.0-beta.4", optional = true }
+regex = { version = "1", optional = true }
+lazy_static = { version = "1", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 rand = "0.8"
 
 [features]
-default = ["cli"]
+default = ["cli", "auto_ansi_escape"]
 cli = ["clap"]
+auto_ansi_escape = ["regex", "lazy_static"]
 
 [[bin]]
 name = "cargo-runcc"

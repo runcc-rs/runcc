@@ -33,6 +33,12 @@ impl CommandSystemPlugin<LabeledCommandData> for CommandSystemLogPlugin {
                         match lines.next_line().await {
                             Ok(line) => {
                                 if let Some(line) = line {
+                                    #[cfg(feature = "auto_ansi_escape")]
+                                    let line = crate::ansi_escape::process_ansi_escape_line(
+                                        label.len() + 3,
+                                        &line,
+                                    );
+
                                     let line = format!("[{}] {}", label, line);
                                     println!("{}", line);
                                 } else {
@@ -56,6 +62,12 @@ impl CommandSystemPlugin<LabeledCommandData> for CommandSystemLogPlugin {
                         match lines.next_line().await {
                             Ok(line) => {
                                 if let Some(line) = line {
+                                    #[cfg(feature = "auto_ansi_escape")]
+                                    let line = crate::ansi_escape::process_ansi_escape_line(
+                                        label.len() + 3,
+                                        &line,
+                                    );
+
                                     let line = format!("[{}] {}", label, line);
                                     eprintln!("{}", line);
                                 } else {

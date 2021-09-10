@@ -10,3 +10,6 @@ pub mod label;
 
 #[cfg(feature = "cli")]
 pub mod cli;
+
+#[cfg(feature = "auto_ansi_escape")]
+mod ansi_escape;
