@@ -45,10 +45,10 @@ impl Display for KillBehavior {
 }
 
 impl std::str::FromStr for KillBehavior {
-    type Err = serde_json::Error;
+    type Err = serde_yaml::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let kill: KillBehaviorInput = serde_json::from_str(s)?;
+        let kill: KillBehaviorInput = serde_yaml::from_str(s)?;
 
         Ok(kill.into())
     }
