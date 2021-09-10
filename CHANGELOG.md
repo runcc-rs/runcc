@@ -1,3 +1,12 @@
+## [1.0.2](https://github.com/runcc-rs/runcc/compare/v1.0.1...v1.0.2) (2021-09-10)
+
+
+### Bug Fixes
+
+* avoid JoinHandle polled after completion in command system waiting ([777384a](https://github.com/runcc-rs/runcc/commit/777384a051f67f9ec1dfbf745d501c767ce987c7))
+* **cli:** cli option --kill FromStr ([6ff5e9e](https://github.com/runcc-rs/runcc/commit/6ff5e9ec283b66a52bb292e8e6592b1501e8689a))
+* kill behavior input deserialize ([eb67e81](https://github.com/runcc-rs/runcc/commit/eb67e812152caada5d251319ef7a98fcb4fe042c))
+
 ## [1.0.1](https://github.com/runcc-rs/runcc/compare/v1.0.0...v1.0.1) (2021-09-09)
 
 
