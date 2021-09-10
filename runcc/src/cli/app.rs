@@ -26,20 +26,18 @@ pub async fn run() -> io::Result<CommandSystemSimpleReport> {
     let mut system =
         crate::run::spawn_from_run_config_with_plugin(config, CommandSystemLogPlugin::new());
 
-    let report = tokio::select!(
-        res = tokio::signal::ctrl_c() => {
-            if let Err(err) = res {
-                eprintln!(
-                    "[runcc][warning] failed to setup Ctrl-C signal handler: {}",
-                    err
-                );
-            } else {
-                system.kill_all().await;
-            }
-            system.wait().await
-        },
-        report = system.wait() => report,
-    );
+    let killer = system.share_killer();
 
-    Ok(report)
+    tokio::spawn(async move {
+        if let Err(err) = tokio::signal::ctrl_c().await {
+            eprintln!(
+                "[runcc][warning] failed to setup Ctrl-C signal handler: {}",
+                err
+            );
+        } else {
+            killer.kill_all().await;
+        }
+    });
+
+    Ok(system.wait().await)
 }
