@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/runcc-rs/runcc/compare/v1.0.2...v1.1.0) (2021-09-10)
+
+
+### Features
+
+* **cli:** feature auto_ansi_escape ([eaa70b9](https://github.com/runcc-rs/runcc/commit/eaa70b91131bac7be0f4d2ea50d98e1d3a4307b1))
+
 ## [1.0.2](https://github.com/runcc-rs/runcc/compare/v1.0.1...v1.0.2) (2021-09-10)
 
 
