@@ -53,3 +53,31 @@ impl std::str::FromStr for KillBehavior {
         Ok(kill.into())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{ExitStatusPattern, KillBehavior};
+
+    #[test]
+    fn deserialize_kill_behavior() {
+        for (input, val) in [
+            ("\"None\"", KillBehavior::None),
+            ("\"WhenAnyExited\"", KillBehavior::WhenAnyExited),
+            (
+                "\"WhenAnySucceeded\"",
+                KillBehavior::WhenAnyExitedWithStatus(ExitStatusPattern::Success),
+            ),
+            (
+                "\"WhenAnyFailed\"",
+                KillBehavior::WhenAnyExitedWithStatus(ExitStatusPattern::Failed),
+            ),
+            (
+                "123",
+                KillBehavior::WhenAnyExitedWithStatus(ExitStatusPattern::StatusCode(123)),
+            ),
+        ] {
+            let res: KillBehavior = serde_json::from_str(input).unwrap();
+            assert_eq!(res, val);
+        }
+    }
+}
