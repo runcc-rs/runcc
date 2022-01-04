@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/runcc-rs/runcc/compare/v1.1.0...v1.1.1) (2022-01-04)
+
+
+### Bug Fixes
+
+* set clap version to exactly 3.0.0-beta.4 ([bbc5739](https://github.com/runcc-rs/runcc/commit/bbc573983fe047c27900b05b4c275837299406ab))
+
 # [1.1.0](https://github.com/runcc-rs/runcc/compare/v1.0.2...v1.1.0) (2021-09-10)
 
 
