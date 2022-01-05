@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/runcc-rs/runcc/compare/v1.1.1...v1.1.2) (2022-01-05)
+
+
+### Bug Fixes
+
+* set clap_derive version to exactly 3.0.0-beta.4 ([ad1d3c4](https://github.com/runcc-rs/runcc/commit/ad1d3c4ee5b87fa4496718f2f1e58704e704d477))
+
 ## [1.1.1](https://github.com/runcc-rs/runcc/compare/v1.1.0...v1.1.1) (2022-01-04)
 
 
