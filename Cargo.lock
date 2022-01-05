@@ -353,6 +353,7 @@ name = "runcc"
 version = "1.1.1"
 dependencies = [
  "clap",
+ "clap_derive",
  "lazy_static",
  "rand",
  "regex",
