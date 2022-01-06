@@ -1,0 +1,29 @@
+```rust
+cargo runcc --help
+```
+
+```trycmd
+$ cargo-runcc --help
+cargo-runcc 1.1.2
+
+Equal Ma <equalma@outlook.com>
+
+Run commands concurrently
+
+USAGE:
+    cargo runcc [OPTIONS] [--] [COMMAND]...
+
+ARGS:
+    <COMMAND>...    
+
+FLAGS:
+    -h, --help       Print help information
+    -V, --version    Print version information
+
+OPTIONS:
+    -c, --config <CONFIG>                        
+    -e, --env <ENV>...                           
+    -k, --kill <KILL>                            
+        --max-label-length <MAX_LABEL_LENGTH>    
+
+```

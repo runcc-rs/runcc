@@ -33,6 +33,11 @@ clap_derive = { version = "=3.0.0-beta.4", optional = true }
 regex = { version = "1", optional = true }
 lazy_static = { version = "1", optional = true }
 
+
+[dev-dependencies]
+trycmd = "0.9.0"
+
+
 [target.'cfg(windows)'.dependencies]
 rand = "0.8"
 
