@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/runcc-rs/runcc/compare/v2.0.1...v2.0.2) (2022-01-07)
+
+
+### Bug Fixes
+
+* rerun release ([56fe1a6](https://github.com/runcc-rs/runcc/commit/56fe1a60d5ae5d1e9aa6b37bc290c6c6feee90f8))
+
 ## [2.0.1](https://github.com/runcc-rs/runcc/compare/v2.0.0...v2.0.1) (2022-01-07)
 
 
