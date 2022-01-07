@@ -1,10 +1,11 @@
-```rust
-cargo runcc --help
+```sh
+cargo runcc
 ```
 
 ```trycmd
-$ cargo-runcc --help
-cargo-runcc 1.1.2
+$ cargo-runcc
+? 2
+cargo-runcc 2.0.0
 Equal Ma <equalma@outlook.com>
 Run commands concurrently
 
@@ -12,14 +13,67 @@ USAGE:
     cargo runcc [OPTIONS] [COMMAND]...
 
 ARGS:
-    <COMMAND>...    
+    <COMMAND>...    Commands to run concurrently
 
 OPTIONS:
-    -c, --config <CONFIG>                        
-    -e, --env <ENV>                              
+    -c, --config <CONFIG>                        Config file path
+    -e, --env <ENV>                              Specify env vars with K=V
     -h, --help                                   Print help information
-    -k, --kill <KILL>                            
-        --max-label-length <MAX_LABEL_LENGTH>    
+    -k, --kill <KILL>                            What to do after some command exits
+        --max-label-length <MAX_LABEL_LENGTH>    Max length to print label in logs
     -V, --version                                Print version information
+
+```
+
+```sh
+cargo runcc --help
+```
+
+```trycmd
+$ cargo-runcc --help
+cargo-runcc 2.0.0
+Equal Ma <equalma@outlook.com>
+Run commands concurrently
+
+USAGE:
+    cargo runcc [OPTIONS] [COMMAND]...
+
+ARGS:
+    <COMMAND>...
+            Commands to run concurrently
+
+OPTIONS:
+    -c, --config <CONFIG>
+            Config file path.
+            
+            Can't be used with positional arguments. See https://github.com/runcc-rs/runcc#usage for
+            details
+
+    -e, --env <ENV>
+            Specify env vars with K=V
+
+    -h, --help
+            Print help information
+
+    -k, --kill <KILL>
+            What to do after some command exits
+            
+            -k None (default)   : do nothing
+            
+            -k WhenAnyExited    : kill all commands when any exited
+            
+            -k WhenAnySucceeded : kill all commands when any exited with status == 0
+            
+            -k WhenAnyFailed    : kill all commands when any exited with status != 0
+            
+            -k <NUMBER>         : kill all commands when any exited with status == <NUMBER>
+
+        --max-label-length <MAX_LABEL_LENGTH>
+            Max length to print label in logs
+            
+            Defaults to the max length of all labels
+
+    -V, --version
+            Print version information
 
 ```

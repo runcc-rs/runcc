@@ -12,13 +12,33 @@ use crate::{read, KillBehavior, RunConfig};
     setting = AppSettings::ArgRequiredElseHelp,
 )]
 pub struct Opts {
+    /// Commands to run concurrently
     command: Vec<String>,
+    /// Config file path.
+    ///
+    /// Can't be used with positional arguments.
+    /// See https://github.com/runcc-rs/runcc#usage for details
     #[clap(short, long)]
     config: Option<Option<String>>,
+    /// Max length to print label in logs
+    ///
+    /// Defaults to the max length of all labels
     #[clap(long)]
     max_label_length: Option<usize>,
+    /// Specify env vars with K=V
     #[clap(short, long)]
     env: Vec<String>,
+    /// What to do after some command exits
+    ///
+    /// -k None (default)   : do nothing
+    ///
+    /// -k WhenAnyExited    : kill all commands when any exited
+    ///
+    /// -k WhenAnySucceeded : kill all commands when any exited with status == 0
+    ///
+    /// -k WhenAnyFailed    : kill all commands when any exited with status != 0
+    ///
+    /// -k <NUMBER>         : kill all commands when any exited with status == <NUMBER>
     #[clap(short, long)]
     kill: Option<KillBehavior>,
 }

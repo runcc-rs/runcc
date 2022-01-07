@@ -23,6 +23,16 @@ plugins:
               numMatches: 1
               numReplacements: 1
           countMatches: true
+        - files:
+            - runcc/tests/cmd/help.trycmd
+          from: "^cargo-runcc .*$"
+          to: "cargo-runcc ${nextRelease.version}"
+          countMatches: true
+          results:
+            - file: runcc/tests/cmd/help.trycmd
+              hasChanged: true
+              numMatches: 2
+              numReplacements: 2
   - - "@semantic-release/exec"
     - prepareCmd: cargo check
       publishCmd: cd runcc && cargo publish
