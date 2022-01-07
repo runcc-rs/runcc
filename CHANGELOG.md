@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/runcc-rs/runcc/compare/v1.1.2...v2.0.0) (2022-01-07)
+
+
+### Features
+
+* upgrade clap to 3 ([0853296](https://github.com/runcc-rs/runcc/commit/08532967bbece66e25d6c24f076838bc13363eac))
+
+
+### BREAKING CHANGES
+
+* help message is changed due to upgrading clap to 3
+
 ## [1.1.2](https://github.com/runcc-rs/runcc/compare/v1.1.1...v1.1.2) (2022-01-05)
 
 
