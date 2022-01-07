@@ -41,4 +41,5 @@ plugins:
         - CHANGELOG.md
         - runcc/Cargo.toml
         - Cargo.lock
+        - runcc/tests/cmd/help.trycmd
   - "@semantic-release/github"
