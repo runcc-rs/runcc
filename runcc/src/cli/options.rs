@@ -1,15 +1,14 @@
 use std::collections::HashMap;
 
-use clap::{crate_authors, crate_version, AppSettings, Clap};
+use clap::{AppSettings, Parser};
 
 use super::OptionsError;
 use crate::{read, KillBehavior, RunConfig};
 
 /// Run commands concurrently
-#[derive(Clap)]
-#[clap(version = crate_version!(), author = crate_authors!(", "), bin_name = "cargo runcc")]
+#[derive(Parser)]
+#[clap(version, author, bin_name = "cargo runcc")]
 #[clap(
-    setting = AppSettings::ColoredHelp,
     setting = AppSettings::ArgRequiredElseHelp,
 )]
 pub struct Opts {
@@ -114,5 +113,17 @@ impl Opts {
         } else {
             Err(OptionsError::NoConfigs)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Opts;
+    use clap::Parser;
+
+    #[test]
+    fn parse_multiple_env() {
+        let opts = Opts::parse_from(["test", "--env", "A=a", "--env", "B=1"]);
+        assert_eq!(opts.env, ["A=a", "B=1"]);
     }
 }

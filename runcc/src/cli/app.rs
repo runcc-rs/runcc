@@ -1,4 +1,4 @@
-use clap::Clap;
+use clap::Parser;
 use std::io;
 
 use super::{options::Opts, CommandSystemLogPlugin};
