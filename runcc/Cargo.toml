@@ -1,6 +1,6 @@
 [package]
 name = "runcc"
-version = "2.0.0" # replace version
+version = "2.0.1" # replace version
 description = "run commands concurrently with rust and cargo"
 license = "MIT"
 edition = "2018"

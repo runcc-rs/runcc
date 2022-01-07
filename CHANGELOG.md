@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/runcc-rs/runcc/compare/v2.0.0...v2.0.1) (2022-01-07)
+
+
+### Bug Fixes
+
+* detailed help messages ([ee8cfda](https://github.com/runcc-rs/runcc/commit/ee8cfda4ae4d2f2a258ef765756115f4b4f1082b))
+
 # [2.0.0](https://github.com/runcc-rs/runcc/compare/v1.1.2...v2.0.0) (2022-01-07)
 
 
