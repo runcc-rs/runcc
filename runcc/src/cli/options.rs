@@ -8,9 +8,6 @@ use crate::{read, KillBehavior, RunConfig};
 /// Run commands concurrently
 #[derive(Parser)]
 #[clap(version, author, bin_name = "cargo runcc")]
-#[clap(
-    setting = AppSettings::ArgRequiredElseHelp,
-)]
 pub struct Opts {
     /// Commands to run concurrently
     command: Vec<String>,
@@ -77,6 +74,14 @@ impl Opts {
             Some(envs)
         } else {
             None
+        };
+
+        // if no commands and no config are given, act as if -c was passed, i.e.
+        // default to searching for the default runcc.* file in the local
+        // directory
+        let (commands, config) = match (&commands[..], &config) {
+            ([], None) => (Vec::new(), Some(None)),
+            _ => (commands, config),
         };
 
         if commands.len() > 0 {

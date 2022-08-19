@@ -4,24 +4,8 @@ cargo runcc
 
 ```trycmd
 $ cargo-runcc
-? 2
-cargo-runcc 2.0.2
-Equal Ma <equalma@outlook.com>
-Run commands concurrently
-
-USAGE:
-    cargo runcc [OPTIONS] [COMMAND]...
-
-ARGS:
-    <COMMAND>...    Commands to run concurrently
-
-OPTIONS:
-    -c, --config <CONFIG>                        Config file path
-    -e, --env <ENV>                              Specify env vars with K=V
-    -h, --help                                   Print help information
-    -k, --kill <KILL>                            What to do after some command exits
-        --max-label-length <MAX_LABEL_LENGTH>    Max length to print label in logs
-    -V, --version                                Print version information
+? 1
+Error: Config file error: No files in "current working directory" matched the patterns: runcc.json, runcc.yml, runcc.yaml, runcc.ron, runcc.toml, Cargo.toml
 
 ```
 
