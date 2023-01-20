@@ -164,8 +164,12 @@ pub fn read_config_from_cargo_toml<T: DeserializeOwned>(
 
     match v {
         toml::Value::Table(mut v) => {
-            let pkg = v.remove(&format!("package.metadata.{}", app_name));
-            let wsp = v.remove(&format!("workspace.metadata.{}", app_name));
+            let pkg = v
+                .remove("package")
+                .and_then(|v| remove_toml_key_path(v, ["metadata", app_name]));
+            let wsp = v
+                .remove("workspace")
+                .and_then(|v| remove_toml_key_path(v, ["metadata", app_name]));
 
             let v = if let Some(pkg) = pkg {
                 if let Some(_) = wsp {
@@ -262,4 +266,15 @@ pub fn find_config_file<T: DeserializeOwned>(
             })
         }
     }
+}
+
+fn remove_toml_key_path<'a>(
+    mut toml: toml::Value,
+    path: impl IntoIterator<Item = &'a str>,
+) -> Option<toml::Value> {
+    for key in path {
+        toml = toml.as_table_mut()?.remove(key)?;
+    }
+
+    Some(toml)
 }
