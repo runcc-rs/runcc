@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/runcc-rs/runcc/compare/v2.0.2...v2.0.3) (2023-01-20)
+
+
+### Bug Fixes
+
+* Cargo.toml not working ([a2c7845](https://github.com/runcc-rs/runcc/commit/a2c7845b984f062c93f38c0668bed9e3a85edbba)), closes [#3](https://github.com/runcc-rs/runcc/issues/3)
+
 ## [2.0.2](https://github.com/runcc-rs/runcc/compare/v2.0.1...v2.0.2) (2022-01-07)
 
 

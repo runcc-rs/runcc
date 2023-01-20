@@ -5,7 +5,7 @@ cargo runcc
 ```trycmd
 $ cargo-runcc
 ? 2
-cargo-runcc 2.0.2
+cargo-runcc 2.0.3
 Equal Ma <equalma@outlook.com>
 Run commands concurrently
 
@@ -31,7 +31,7 @@ cargo runcc --help
 
 ```trycmd
 $ cargo-runcc --help
-cargo-runcc 2.0.2
+cargo-runcc 2.0.3
 Equal Ma <equalma@outlook.com>
 Run commands concurrently
 
